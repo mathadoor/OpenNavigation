@@ -26,18 +26,22 @@ OPT = [
       "habitat_baselines.load_resume_state_config=False",]
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 text_embeddings = {}
+
 def get_obj_prompt(config, load_data=False):
+    # load_data is used in case the user is unaware of the exact name of the categories in the database.
     if load_data:
         data = habitat.datasets.object_nav.object_nav_dataset.ObjectNavDatasetV1(config.habitat.dataset)
         object_categories = list(data.category_to_task_category_id.keys())
         del data
     else:
         object_categories = ["chair", "sofa", "plant", "bed", "toilet", "tv_monitor"]
+    # Convert object categories into object prompts
     object_prompts = ["a photo of " + category for category in object_categories]
     return object_categories, object_prompts
 
 
 def get_embeddings(object_categories, object_prompts, device='cpu'):
+    # Load CLIP model, convert the prompts, and store them as a dictionary
     model, preprocess = clip.load("RN50")
     model.to(device)
     text_tokens = clip.tokenize(object_prompts).to(device)
@@ -50,7 +54,7 @@ def get_embeddings(object_categories, object_prompts, device='cpu'):
 
     return text_embeddings
 
-
+# Register ObjectGoalPromptSensor
 @registry.register_sensor(name="ObjectGoalPromptSensor")
 class ObjectGoalPromptSensor(Sensor):
     def __init__(self, sim, config, dataset, **kwargs):
@@ -85,14 +89,15 @@ if __name__ == "__main__":
     cats, prompts = get_obj_prompt(config, load_data=False)
     text_embeddings = get_embeddings(cats, prompts, device=DEVICE)
     torch.save(text_embeddings, 'clip_embeddings.pt')
+    
     # Add ObjectGoalPromptSensor to the Config
     with habitat.config.read_write(config):
-    # # #     # Now define the config for the sensor
+      
+    # Now define the config for the sensor
         config.habitat_baselines["num_updates"] = -1
         config.habitat_baselines["total_num_steps"] = 1000000
         config.habitat.task.lab_sensors["ObjectGoalPromptSensor"] = ObjectGoalSensorConfig(type="ObjectGoalPromptSensor")
         del config.habitat.task.lab_sensors["objectgoal_sensor"]
-        # config.habitat.task["goal_sensor_uuid"] = "goal_prompt_embedding"
 
     # Initialize and Run Training
     trainer_init = baseline_registry.get_trainer(config.habitat_baselines.trainer_name)
