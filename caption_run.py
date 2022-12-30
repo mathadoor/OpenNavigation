@@ -1,4 +1,3 @@
-# Import Relevant Libraries
 import habitat
 import clip
 import torch
@@ -14,8 +13,8 @@ DATA_DIR = "/content/habitat-lab_call_for_collab/data/datasets/imagenav/train/co
 RUN_TYPE = 'train'
 CONFIG_FILE = "./habitat-lab_call_for_collab/habitat-baselines/habitat_baselines/config/imagenav/ddppo_imagenav_gibson.yaml"
 OPT = [
-    "habitat.dataset.data_path='/content/habitat_project/habitat-lab_call_for_collab/data/datasets/imagenav/train/train.json.gz'",
-    "habitat_baselines.num_environments=2",
+    "habitat.dataset.data_path='/content/habitat-lab_call_for_collab/data/datasets/imagenav/train/train.json.gz'",
+    "habitat_baselines.num_environments=4",
     "habitat.dataset.scenes_dir='/content/habitat-lab_call_for_collab/data/scene_datasets'",
     "habitat.dataset.content_scenes=['1S7LAXRdDqK']",
     "habitat.simulator.agents.main_agent.sim_sensors.rgb_sensor.width=256",
@@ -70,11 +69,10 @@ if __name__ == "__main__":
 
     with habitat.config.read_write(config):
         config.habitat_baselines["num_updates"] = -1
-        config.habitat_baselines["total_num_steps"] = 1000000
+        config.habitat_baselines["total_num_steps"] = 2500000
         config.habitat.task.lab_sensors["CaptionGoalSensor"] = ObjectGoalSensorConfig(type="CaptionGoalSensor")
         
     # Initialize and run the training
     trainer_init = baseline_registry.get_trainer(config.habitat_baselines.trainer_name)
     trainer = trainer_init(config)
     trainer.train()
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
