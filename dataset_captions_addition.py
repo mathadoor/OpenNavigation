@@ -10,7 +10,7 @@ from transformers import VisionEncoderDecoderModel, ViTFeatureExtractor, AutoTok
 DATA_DIR = "/content/habitat-lab_call_for_collab/data/datasets/imagenav/train/content/"
 CONFIG_FILE = "./habitat-lab_call_for_collab/habitat-baselines/habitat_baselines/config/imagenav/ddppo_imagenav_gibson.yaml"
 OPT = [
-    "habitat.dataset.data_path='/content/habitat_project/habitat-lab_call_for_collab/data/datasets/imagenav/train/train.json.gz'",
+    "habitat.dataset.data_path='/content/habitat-lab_call_for_collab/data/datasets/imagenav/train/train.json.gz'",
     "habitat_baselines.num_environments=2",
     "habitat.dataset.scenes_dir='/content/habitat-lab_call_for_collab/data/scene_datasets'",
     "habitat.dataset.content_scenes=['1S7LAXRdDqK']",
