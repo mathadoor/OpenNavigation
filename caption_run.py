@@ -25,9 +25,13 @@ OPT = [
     "habitat_baselines.load_resume_state_config=False"]
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
+
 @registry.register_sensor(name="CaptionGoalSensor")
 class CaptionGoalSensor(Sensor):
     def __init__(self, sim, config, dataset, **kwargs):
+        '''
+        Initialize the CaptionGoalSensor. CLIP Model is also added as to encode the captions.
+        '''
         self._sim = sim
         self._dataset = dataset
         self.device = DEVICE
@@ -48,7 +52,9 @@ class CaptionGoalSensor(Sensor):
         return "caption_goal_embedding"
 
     def get_observation(self, observations, *args, episode, **kwargs):
-        # caption = episode['info']['CaptionGoal']
+        '''
+        Extracts and returns the CaptionGoal from the episode.info dictionary
+        '''
         try:
             caption = episode.info['CaptionGoal']
         except NameError:
@@ -57,6 +63,8 @@ class CaptionGoalSensor(Sensor):
         return self.model.encode_text(caption_token).detach().float().squeeze()
 
 if __name__ == "__main__":
+    # Empty the Cache, Load the config File, and Register the CaptionGoal Sensor
+    
     torch.cuda.empty_cache()
     config = get_config(CONFIG_FILE, OPT)
 
@@ -64,6 +72,8 @@ if __name__ == "__main__":
         config.habitat_baselines["num_updates"] = -1
         config.habitat_baselines["total_num_steps"] = 1000000
         config.habitat.task.lab_sensors["CaptionGoalSensor"] = ObjectGoalSensorConfig(type="CaptionGoalSensor")
+        
+    # Initialize and run the training
     trainer_init = baseline_registry.get_trainer(config.habitat_baselines.trainer_name)
     trainer = trainer_init(config)
     trainer.train()
